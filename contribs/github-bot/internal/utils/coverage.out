@@ -1,0 +1,22 @@
+mode: set
+github.com/gnolang/gno/contribs/github-bot/internal/utils/actions.go:10.53,11.20 1 1
+github.com/gnolang/gno/contribs/github-bot/internal/utils/actions.go:11.20,13.3 1 1
+github.com/gnolang/gno/contribs/github-bot/internal/utils/actions.go:15.2,15.31 1 1
+github.com/gnolang/gno/contribs/github-bot/internal/utils/actions.go:15.31,16.38 1 1
+github.com/gnolang/gno/contribs/github-bot/internal/utils/actions.go:16.38,18.4 1 1
+github.com/gnolang/gno/contribs/github-bot/internal/utils/actions.go:19.3,20.35 2 1
+github.com/gnolang/gno/contribs/github-bot/internal/utils/actions.go:23.2,23.12 1 1
+github.com/gnolang/gno/contribs/github-bot/internal/utils/actions.go:27.82,30.29 2 0
+github.com/gnolang/gno/contribs/github-bot/internal/utils/actions.go:31.23,32.21 1 0
+github.com/gnolang/gno/contribs/github-bot/internal/utils/actions.go:33.45,34.28 1 0
+github.com/gnolang/gno/contribs/github-bot/internal/utils/actions.go:35.10,36.69 1 0
+github.com/gnolang/gno/contribs/github-bot/internal/utils/actions.go:39.2,40.21 2 0
+github.com/gnolang/gno/contribs/github-bot/internal/utils/actions.go:40.21,42.3 1 0
+github.com/gnolang/gno/contribs/github-bot/internal/utils/actions.go:44.2,44.22 1 0
+github.com/gnolang/gno/contribs/github-bot/internal/utils/testing.go:10.82,16.13 4 0
+github.com/gnolang/gno/contribs/github-bot/internal/utils/testing.go:16.13,18.3 1 0
+github.com/gnolang/gno/contribs/github-bot/internal/utils/testing.go:20.2,20.50 1 0
+github.com/gnolang/gno/contribs/github-bot/internal/utils/tree.go:16.70,17.7 1 0
+github.com/gnolang/gno/contribs/github-bot/internal/utils/tree.go:17.7,19.3 1 0
+github.com/gnolang/gno/contribs/github-bot/internal/utils/tree.go:19.8,21.3 1 0
+github.com/gnolang/gno/contribs/github-bot/internal/utils/tree.go:23.2,23.10 1 0
