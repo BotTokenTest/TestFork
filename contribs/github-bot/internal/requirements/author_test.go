@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gnolang/gno/contribs/github-bot/internal/client"
-	"github.com/gnolang/gno/contribs/github-bot/internal/logger"
-	"github.com/gnolang/gno/contribs/github-bot/internal/utils"
+	"github-bot/internal/client"
+	"github-bot/internal/logger"
+	"github-bot/internal/utils"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/google/go-github/v64/github"

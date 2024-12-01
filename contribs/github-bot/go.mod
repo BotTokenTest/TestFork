@@ -1,13 +1,11 @@
-module github.com/gnolang/gno/contribs/github-bot
+module github-bot
 
 go 1.22
 
 toolchain go1.22.2
 
-replace github.com/gnolang/gno => ../..
-
 require (
-	github.com/gnolang/gno v0.0.0-00010101000000-000000000000
+	github.com/gnolang/gno v0.0.0-20241129090514-2c060704b022
 	github.com/google/go-github/v64 v64.0.0
 	github.com/migueleliasweb/go-github-mock v1.0.1
 	github.com/sethvargo/go-githubactions v1.3.0

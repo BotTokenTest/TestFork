@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/gnolang/gno/contribs/github-bot/internal/client"
-	"github.com/gnolang/gno/contribs/github-bot/internal/utils"
+	"github-bot/internal/client"
+	"github-bot/internal/utils"
 
 	"github.com/google/go-github/v64/github"
 	"github.com/xlab/treeprint"
