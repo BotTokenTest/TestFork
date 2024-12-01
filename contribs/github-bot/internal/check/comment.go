@@ -5,13 +5,13 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
+	"github-bot/internal/client"
+	"github-bot/internal/config"
+	"github-bot/internal/utils"
 	"regexp"
 	"strings"
 	"text/template"
 
-	"github-bot/internal/client"
-	"github-bot/internal/config"
-	"github-bot/internal/utils"
 	"github.com/google/go-github/v64/github"
 	"github.com/sethvargo/go-githubactions"
 )
@@ -99,6 +99,18 @@ func handleCommentUpdate(gh *client.GitHub, actionCtx *githubactions.GitHubConte
 		return nil
 	}
 
+	// Get PR number from GitHub Actions context.
+	prNumFloat, ok := utils.IndexMap(actionCtx.Event, "issue", "number").(float64)
+	if !ok || prNumFloat <= 0 {
+		return errors.New("unable to get issue number on issue comment event")
+	}
+	prNum := int(prNumFloat)
+
+	// Ignore if this comment update is not related to an opened PR.
+	if _, err := gh.GetOpenedPullRequest(prNum); err != nil {
+		return nil // May come from an issue or a closed PR
+	}
+
 	// Return if comment was edited by bot (current authenticated user).
 	authUser, _, err := gh.Client.Users.Get(gh.Ctx, "")
 	if err != nil {
@@ -131,12 +143,6 @@ func handleCommentUpdate(gh *client.GitHub, actionCtx *githubactions.GitHubConte
 	previous, ok := utils.IndexMap(actionCtx.Event, "changes", "body", "from").(string)
 	if !ok {
 		return errors.New("unable to get changes body content on issue comment event")
-	}
-
-	// Get PR number from GitHub Actions context.
-	prNum, ok := utils.IndexMap(actionCtx.Event, "issue", "number").(float64)
-	if !ok || prNum <= 0 {
-		return errors.New("unable to get issue number on issue comment event")
 	}
 
 	// Check if change is only a checkbox being checked or unckecked.

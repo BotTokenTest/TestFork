@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github-bot/internal/client"
+	"github-bot/internal/utils"
 	"os"
 	"strings"
 
-	"github-bot/internal/client"
-	"github-bot/internal/utils"
 	"github.com/sethvargo/go-githubactions"
 )
 
@@ -22,7 +22,7 @@ func execMatrix(flags *matrixFlags) error {
 
 	// If verbose is set, print the Github Actions event for debugging purpose.
 	if *flags.verbose {
-		jsonBytes, _ := json.MarshalIndent(actionCtx.Event, "", "  ")
+		jsonBytes, err := json.MarshalIndent(actionCtx.Event, "", "  ")
 		if err != nil {
 			return fmt.Errorf("unable to marshal event to json: %w", err)
 		}
@@ -125,15 +125,15 @@ func getPRListFromEvent(gh *client.GitHub, actionCtx *githubactions.GitHubContex
 		return nil, fmt.Errorf("unsupported event type: %s", actionCtx.EventName)
 	}
 
-	// Then check if all provided PR are opened.
+	// Then only keep provided PR that are opened.
+	openedPRList := utils.PRList{}
 	for _, prNum := range prList {
-		pr, _, err := gh.Client.PullRequests.Get(gh.Ctx, gh.Owner, gh.Repo, prNum)
-		if err != nil {
-			return nil, fmt.Errorf("unable to retrieve specified pull request (%d): %w", prNum, err)
-		} else if pr.GetState() != utils.PRStateOpen {
-			return nil, fmt.Errorf("pull request %d is not opened, actual state: %s", prNum, pr.GetState())
+		if _, err := gh.GetOpenedPullRequest(prNum); err != nil {
+			gh.Logger.Warningf("Can't get PR from event: %v", err)
+		} else {
+			openedPRList = append(openedPRList, prNum)
 		}
 	}
 
-	return prList, nil
+	return openedPRList, nil
 }
