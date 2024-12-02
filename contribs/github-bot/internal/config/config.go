@@ -61,7 +61,7 @@ func Config(gh *client.GitHub) ([]AutomaticCheck, []ManualCheck) {
 		{
 			Description: "Determine if infra needs to be updated before merging",
 			If: c.And(
-				c.BaseBranch("master"),
+				c.BaseBranch("main"),
 				c.Or(
 					c.FileChanged(gh, `Dockerfile`),
 					c.FileChanged(gh, `^misc/deployments`),
