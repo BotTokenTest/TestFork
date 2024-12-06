@@ -5,7 +5,7 @@ on:
 
 jobs:
   test:
-    if: ${{ github.actor != "JEAN_MICH" }}
+    if: ${{ github.actor != 'JEAN_MICH' }}
     runs-on: ubuntu-latest
 
     steps:
