@@ -9,11 +9,15 @@ on:
       - labeled
       - unlabeled
       - opened
+      - edited
       - reopened
       - synchronize # PR head updated
       - converted_to_draft
       - ready_for_review
 
+  branch_protection_rule:
+    types: [created, edited, deleted]
+    
   # Watch for changes on PR reviews
   pull_request_review:
     types: [submitted, edited, dismissed]
