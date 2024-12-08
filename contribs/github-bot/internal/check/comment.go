@@ -28,7 +28,7 @@ var (
 	// Regex for capturing only the checkboxes.
 	checkboxes = regexp.MustCompile(`(?m:^- \[[ x]\])`)
 	// Regex used to capture markdown links.
-	markdownLink = regexp.MustCompile(`\[(.*)\]\(.*\)`)
+	markdownLink = regexp.MustCompile(`\[(.*)\]\([^)]*\)`)
 )
 
 // These structures contain the necessary information to generate
@@ -46,9 +46,11 @@ type ManualContent struct {
 	Teams            []string
 }
 type CommentContent struct {
-	AutoRules    []AutoContent
-	ManualRules  []ManualContent
-	allSatisfied bool
+	AutoRules          []AutoContent
+	ManualRules        []ManualContent
+	AutoAllSatisfied   bool
+	ManualAllSatisfied bool
+	ForceSkip          bool
 }
 
 type manualCheckDetails struct {
@@ -149,7 +151,7 @@ func handleCommentUpdate(gh *client.GitHub, actionCtx *githubactions.GitHubConte
 	if checkboxes.ReplaceAllString(current, "") != checkboxes.ReplaceAllString(previous, "") {
 		// If not, restore previous comment body.
 		if !gh.DryRun {
-			gh.SetBotComment(previous, int(prNum))
+			gh.SetBotComment(previous, prNum)
 		}
 		return errors.New("bot comment edited outside of checkboxes")
 	}
@@ -187,7 +189,7 @@ func handleCommentUpdate(gh *client.GitHub, actionCtx *githubactions.GitHubConte
 		if len(teams) > 0 {
 			if !gh.IsUserInTeams(actionCtx.Actor, teams) { // If user not allowed to check the boxes.
 				if !gh.DryRun {
-					gh.SetBotComment(previous, int(prNum)) // Then restore previous state.
+					gh.SetBotComment(previous, prNum) // Then restore previous state.
 				}
 				return errors.New("checkbox edited by a user not allowed to")
 			}
@@ -209,7 +211,7 @@ func handleCommentUpdate(gh *client.GitHub, actionCtx *githubactions.GitHubConte
 
 	// Update comment with username.
 	if edited != "" && !gh.DryRun {
-		gh.SetBotComment(edited, int(prNum))
+		gh.SetBotComment(edited, prNum)
 		gh.Logger.Debugf("Comment manual checks updated successfully")
 	}
 
@@ -261,13 +263,15 @@ func updatePullRequest(gh *client.GitHub, pr *github.PullRequest, content Commen
 	var (
 		context     = "Merge Requirements"
 		targetURL   = comment.GetHTMLURL()
-		state       = "failure"
-		description = "Some requirements are not satisfied yet. See bot comment."
+		state       = "success"
+		description = "All requirements are satisfied."
 	)
 
-	if content.allSatisfied {
-		state = "success"
-		description = "All requirements are satisfied."
+	if content.ForceSkip {
+		description = "Bot checks are skipped for this PR."
+	} else if !content.AutoAllSatisfied || !content.ManualAllSatisfied {
+		state = "failure"
+		description = "Some requirements are not satisfied yet. See bot comment."
 	}
 
 	// Update or create commit status.
