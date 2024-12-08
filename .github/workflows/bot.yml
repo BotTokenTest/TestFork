@@ -9,6 +9,7 @@ on:
       - labeled
       - unlabeled
       - opened
+      - edited
       - reopened
       - synchronize # PR head updated
       - converted_to_draft
