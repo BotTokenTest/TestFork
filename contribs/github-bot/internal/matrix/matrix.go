@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github-bot/internal/client"
-	"github-bot/internal/utils"
 	"os"
 	"strings"
 
+	"github.com/gnolang/gno/contribs/github-bot/internal/client"
+	"github.com/gnolang/gno/contribs/github-bot/internal/utils"
 	"github.com/sethvargo/go-githubactions"
 )
 
@@ -126,7 +126,7 @@ func getPRListFromEvent(gh *client.GitHub, actionCtx *githubactions.GitHubContex
 	}
 
 	// Then only keep provided PR that are opened.
-	openedPRList := utils.PRList{}
+	var openedPRList utils.PRList = nil
 	for _, prNum := range prList {
 		if _, err := gh.GetOpenedPullRequest(prNum); err != nil {
 			gh.Logger.Warningf("Can't get PR from event: %v", err)

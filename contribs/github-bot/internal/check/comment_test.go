@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github-bot/internal/client"
-	"github-bot/internal/logger"
-	"github-bot/internal/utils"
+	"github.com/gnolang/gno/contribs/github-bot/internal/client"
+	"github.com/gnolang/gno/contribs/github-bot/internal/logger"
+	"github.com/gnolang/gno/contribs/github-bot/internal/utils"
 	"github.com/google/go-github/v64/github"
 	"github.com/migueleliasweb/go-github-mock/src/mock"
 	"github.com/sethvargo/go-githubactions"
@@ -42,20 +42,33 @@ func TestGeneratedComment(t *testing.T) {
 	assert.Nil(t, err, fmt.Sprintf("error is not nil: %v", err))
 	assert.True(t, strings.Contains(commentText, "*No automated checks match this pull request.*"), "should contains automated check placeholder")
 	assert.True(t, strings.Contains(commentText, "*No manual checks match this pull request.*"), "should contains manual check placeholder")
+	assert.True(t, strings.Contains(commentText, "All **Automated Checks** passed. ✅"), "should contains automated checks passed placeholder")
 
 	content.AutoRules = autoRules
+	content.AutoAllSatisfied = true
 	commentText, err = generateComment(content)
 	assert.Nil(t, err, fmt.Sprintf("error is not nil: %v", err))
 	assert.False(t, strings.Contains(commentText, "*No automated checks match this pull request.*"), "should not contains automated check placeholder")
 	assert.True(t, strings.Contains(commentText, "*No manual checks match this pull request.*"), "should contains manual check placeholder")
+	assert.True(t, strings.Contains(commentText, "All **Automated Checks** passed. ✅"), "should contains automated checks passed placeholder")
 	assert.Equal(t, 2, len(autoCheckSuccessLine.FindAllStringSubmatch(commentText, -1)), "wrong number of succeeded automatic check")
 	assert.Equal(t, 3, len(autoCheckFailLine.FindAllStringSubmatch(commentText, -1)), "wrong number of failed automatic check")
+
+	content.AutoAllSatisfied = false
+	commentText, err = generateComment(content)
+	assert.Nil(t, err, fmt.Sprintf("error is not nil: %v", err))
+	assert.False(t, strings.Contains(commentText, "*No automated checks match this pull request.*"), "should not contains automated check placeholder")
+	assert.True(t, strings.Contains(commentText, "*No manual checks match this pull request.*"), "should contains manual check placeholder")
+	assert.False(t, strings.Contains(commentText, "All **Automated Checks** passed. ✅"), "should contains automated checks passed placeholder")
+	assert.Equal(t, 2, len(autoCheckSuccessLine.FindAllStringSubmatch(commentText, -1)), "wrong number of succeeded automatic check")
+	assert.Equal(t, 3+3, len(autoCheckFailLine.FindAllStringSubmatch(commentText, -1)), "wrong number of failed automatic check")
 
 	content.ManualRules = manualRules
 	commentText, err = generateComment(content)
 	assert.Nil(t, err, fmt.Sprintf("error is not nil: %v", err))
 	assert.False(t, strings.Contains(commentText, "*No automated checks match this pull request.*"), "should not contains automated check placeholder")
 	assert.False(t, strings.Contains(commentText, "*No manual checks match this pull request.*"), "should not contains manual check placeholder")
+	assert.False(t, strings.Contains(commentText, "All **Automated Checks** passed. ✅"), "should contains automated checks passed placeholder")
 
 	manualChecks := getCommentManualChecks(commentText)
 	assert.Equal(t, len(manualChecks), len(manualRules), "wrong number of manual checks found")
@@ -120,6 +133,21 @@ func TestCommentUpdateHandler(t *testing.T) {
 	assert.NoError(t, handleCommentUpdate(gh, actionCtx))
 	actionCtx.Event["action"] = "deleted"
 
+	// Exit with error because Event.issue.number is not set.
+	assert.Error(t, handleCommentUpdate(gh, actionCtx))
+	actionCtx.Event = setValue(t, actionCtx.Event, float64(42), "issue", "number")
+
+	// Exit without error can't get open pull request associated with PR num.
+	assert.NoError(t, handleCommentUpdate(gh, actionCtx))
+	mockOptions = append(mockOptions, mock.WithRequestMatchPages(
+		mock.EndpointPattern{
+			Pattern: "/repos/pulls/42",
+			Method:  "GET",
+		},
+		github.PullRequest{Number: github.Int(42), State: github.String(utils.PRStateOpen)},
+	))
+	gh = newGHClient()
+
 	// Exit with error because mock not setup to return authUser.
 	assert.Error(t, handleCommentUpdate(gh, actionCtx))
 	mockOptions = append(mockOptions, mock.WithRequestMatchPages(
@@ -151,10 +179,6 @@ func TestCommentUpdateHandler(t *testing.T) {
 	// Exit with error because Event.changes.body.from is not set.
 	assert.Error(t, handleCommentUpdate(gh, actionCtx))
 	actionCtx.Event = setValue(t, actionCtx.Event, "updated_body", "changes", "body", "from")
-
-	// Exit with error because Event.issue.number is not set.
-	assert.Error(t, handleCommentUpdate(gh, actionCtx))
-	actionCtx.Event = setValue(t, actionCtx.Event, float64(42), "issue", "number")
 
 	// Exit with error because checkboxes are differents.
 	assert.Error(t, handleCommentUpdate(gh, actionCtx))

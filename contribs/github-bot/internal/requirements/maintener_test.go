@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github-bot/internal/utils"
+	"github.com/gnolang/gno/contribs/github-bot/internal/utils"
 	"github.com/google/go-github/v64/github"
 	"github.com/stretchr/testify/assert"
 	"github.com/xlab/treeprint"

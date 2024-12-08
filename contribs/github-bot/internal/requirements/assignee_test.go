@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github-bot/internal/client"
-	"github-bot/internal/logger"
-	"github-bot/internal/utils"
+	"github.com/gnolang/gno/contribs/github-bot/internal/client"
+	"github.com/gnolang/gno/contribs/github-bot/internal/logger"
+	"github.com/gnolang/gno/contribs/github-bot/internal/utils"
 	"github.com/migueleliasweb/go-github-mock/src/mock"
 	"github.com/stretchr/testify/assert"
 

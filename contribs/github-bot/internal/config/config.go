@@ -1,9 +1,9 @@
 package config
 
 import (
-	"github-bot/internal/client"
-	c "github-bot/internal/conditions"
-	r "github-bot/internal/requirements"
+	"github.com/gnolang/gno/contribs/github-bot/internal/client"
+	c "github.com/gnolang/gno/contribs/github-bot/internal/conditions"
+	r "github.com/gnolang/gno/contribs/github-bot/internal/requirements"
 )
 
 type Teams []string
@@ -22,17 +22,21 @@ type ManualCheck struct {
 	Teams       Teams       // Members of these teams can check the checkbox to make the check pass.
 }
 
+// This is the description for a persistent rule with a non-standard behavior
+// that allow maintainer to force the "success" state of the CI check
+const ForceSkipDescription = "**SKIP**: Do not block the CI for this PR"
+
 // This function returns the configuration of the bot consisting of automatic and manual checks
 // in which the GitHub client is injected.
 func Config(gh *client.GitHub) ([]AutomaticCheck, []ManualCheck) {
 	auto := []AutomaticCheck{
 		{
-			Description: "Maintainers must be able to edit this pull request",
+			Description: "Maintainers must be able to edit this pull request ([more info](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/allowing-changes-to-a-pull-request-branch-created-from-a-fork))",
 			If:          c.Always(),
 			Then:        r.MaintainerCanModify(),
 		},
 		{
-			Description: "The pull request head branch must be up-to-date with its base",
+			Description: "The pull request head branch must be up-to-date with its base ([more info](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/keeping-your-pull-request-in-sync-with-the-base-branch))",
 			If:          c.Always(),
 			Then:        r.UpToDateWith(gh, r.PR_BASE),
 		},
@@ -54,6 +58,11 @@ func Config(gh *client.GitHub) ([]AutomaticCheck, []ManualCheck) {
 
 	manual := []ManualCheck{
 		{
+			// WARN: Do not edit this special rule which must remain persistent.
+			Description: ForceSkipDescription,
+			If:          c.Always(),
+		},
+		{
 			Description: "The pull request description provides enough details",
 			If:          c.Not(c.AuthorInTeam(gh, "core-contributors")),
 			Teams:       Teams{"core-contributors"},
@@ -61,7 +70,7 @@ func Config(gh *client.GitHub) ([]AutomaticCheck, []ManualCheck) {
 		{
 			Description: "Determine if infra needs to be updated before merging",
 			If: c.And(
-				c.BaseBranch("main"),
+				c.BaseBranch("master"),
 				c.Or(
 					c.FileChanged(gh, `Dockerfile`),
 					c.FileChanged(gh, `^misc/deployments`),

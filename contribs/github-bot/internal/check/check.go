@@ -4,14 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github-bot/internal/client"
-	"github-bot/internal/config"
-	"github-bot/internal/logger"
-	"github-bot/internal/utils"
 	"strings"
 	"sync"
 	"sync/atomic"
 
+	"github.com/gnolang/gno/contribs/github-bot/internal/client"
+	"github.com/gnolang/gno/contribs/github-bot/internal/config"
+	"github.com/gnolang/gno/contribs/github-bot/internal/logger"
+	"github.com/gnolang/gno/contribs/github-bot/internal/utils"
 	"github.com/google/go-github/v64/github"
 	"github.com/sethvargo/go-githubactions"
 	"github.com/xlab/treeprint"
@@ -101,7 +101,8 @@ func processPRList(gh *client.GitHub, prs []*github.PullRequest) error {
 		go func(pr *github.PullRequest) {
 			defer wg.Done()
 			commentContent := CommentContent{}
-			commentContent.allSatisfied = true
+			commentContent.AutoAllSatisfied = true
+			commentContent.ManualAllSatisfied = true
 
 			// Iterate over all automatic rules in config.
 			for _, autoRule := range autoRules {
@@ -120,7 +121,7 @@ func processPRList(gh *client.GitHub, prs []*github.PullRequest) error {
 					thenDetails.SetValue(fmt.Sprintf("%s Requirement satisfied", utils.Success))
 					c.Satisfied = true
 				} else {
-					commentContent.allSatisfied = false
+					commentContent.AutoAllSatisfied = false
 				}
 
 				c.ConditionDetails = ifDetails.String()
@@ -160,8 +161,14 @@ func processPRList(gh *client.GitHub, prs []*github.PullRequest) error {
 					},
 				)
 
+				// Check the state of the special check that forces the bot to succeed.
+				if manualRule.Description == config.ForceSkipDescription && checkedBy != "" {
+					commentContent.ForceSkip = true
+					continue
+				}
+
 				if checkedBy == "" {
-					commentContent.allSatisfied = false
+					commentContent.ManualAllSatisfied = false
 				}
 			}
 
@@ -224,9 +231,20 @@ func logResults(logger logger.Logger, prNum int, commentContent CommentContent) 
 	}
 
 	logger.Infof("Conclusion:")
-	if commentContent.allSatisfied {
-		logger.Infof("%s All requirements are satisfied\n", utils.Success)
+
+	if commentContent.ForceSkip {
+		logger.Infof("%s Bot checks are force skipped\n", utils.Success)
+	}
+
+	if commentContent.AutoAllSatisfied {
+		logger.Infof("%s All automated checks are satisfied\n", utils.Success)
 	} else {
-		logger.Infof("%s Not all requirements are satisfied\n", utils.Fail)
+		logger.Infof("%s Some automated checks are not satisfied\n", utils.Fail)
+	}
+
+	if commentContent.ManualAllSatisfied {
+		logger.Infof("%s All manual checks are satisfied\n", utils.Success)
+	} else {
+		logger.Infof("%s Some manual checks are not satisfied\n", utils.Fail)
 	}
 }

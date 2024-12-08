@@ -1,7 +1,7 @@
 package requirements
 
 import (
-	"github-bot/internal/utils"
+	"github.com/gnolang/gno/contribs/github-bot/internal/utils"
 
 	"github.com/google/go-github/v64/github"
 	"github.com/xlab/treeprint"
