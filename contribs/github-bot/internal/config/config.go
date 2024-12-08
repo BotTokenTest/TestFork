@@ -36,6 +36,21 @@ func Config(gh *client.GitHub) ([]AutomaticCheck, []ManualCheck) {
 			Then:        r.MaintainerCanModify(),
 		},
 		{
+			Description: "Test automated 1",
+			If:          c.Always(),
+			Then:        r.Label(gh, "bug"),
+		},
+		{
+			Description: "Test automated 2",
+			If:          c.Always(),
+			Then:        r.Label(gh, "bug"),
+		},
+		{
+			Description: "Test automated 3",
+			If:          c.Always(),
+			Then:        r.Label(gh, "bug"),
+		},
+		{
 			Description: "The pull request head branch must be up-to-date with its base ([more info](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/keeping-your-pull-request-in-sync-with-the-base-branch))",
 			If:          c.Always(),
 			Then:        r.UpToDateWith(gh, r.PR_BASE),
@@ -60,6 +75,18 @@ func Config(gh *client.GitHub) ([]AutomaticCheck, []ManualCheck) {
 		{
 			// WARN: Do not edit this special rule which must remain persistent.
 			Description: ForceSkipDescription,
+			If:          c.Always(),
+		},
+		{
+			Description: "Test manual 1",
+			If:          c.Always(),
+		},
+		{
+			Description: "Test manual 2",
+			If:          c.Always(),
+		},
+		{
+			Description: "Test manual 3",
 			If:          c.Always(),
 		},
 		{
