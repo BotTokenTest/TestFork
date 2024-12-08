@@ -5,8 +5,8 @@ import (
 	"flag"
 	"os"
 
-	"github.com/gnolang/gno/contribs/github-bot/internal/check"
-	"github.com/gnolang/gno/contribs/github-bot/internal/matrix"
+	"github-bot/internal/check"
+	"github-bot/internal/matrix"
 	"github.com/gnolang/gno/tm2/pkg/commands"
 )
 

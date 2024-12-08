@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gnolang/gno/contribs/github-bot/internal/client"
-	"github.com/gnolang/gno/contribs/github-bot/internal/utils"
+	"github-bot/internal/client"
+	"github-bot/internal/utils"
 	"github.com/sethvargo/go-githubactions"
 )
 

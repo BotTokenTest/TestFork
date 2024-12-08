@@ -1,9 +1,9 @@
 package config
 
 import (
-	"github.com/gnolang/gno/contribs/github-bot/internal/client"
-	c "github.com/gnolang/gno/contribs/github-bot/internal/conditions"
-	r "github.com/gnolang/gno/contribs/github-bot/internal/requirements"
+	"github-bot/internal/client"
+	c "github-bot/internal/conditions"
+	r "github-bot/internal/requirements"
 )
 
 type Teams []string
