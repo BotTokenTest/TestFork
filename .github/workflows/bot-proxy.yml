@@ -37,9 +37,14 @@ jobs:
         continue-on-error: true
         id: download
 
+      - name: DEBUG
+        run: ls; cat pr-number
+
       - name: Send workflow_dispatch event to Github Bot
         # Run only if an artifact was downloaded
         if: steps.download.outcome == 'success'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run bot.yml -f "pull-request-list=$(cat pr-number)"
+          REPO: ${{ github.event.workflow_run.repository.full_name }}
+        run: |
+          gh workflow run bot.yml -R "$REPO" -f "pull-request-list=$(cat pr-number)"
