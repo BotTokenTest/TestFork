@@ -28,10 +28,15 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: pr-number
-        id: download
+        # Even if the artifact doesn't exist, do not mark the workflow as failed
+        # Useful if the 'pull_request_review' event was emitted by a PR opened
+        # from a branch on the main repo, so it has already been processed by
+        # the bot workflow, and no artifact has been uploaded.
         continue-on-error: true
+        id: download
 
       - name: Send workflow_dispatch event to Github Bot
+        # Run only if an artifact was downloaded
         if: steps.download.outcome == 'success'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
