@@ -14,10 +14,6 @@ on:
       - converted_to_draft
       - ready_for_review
 
-  # Watch for changes on PR reviews
-  pull_request_review:
-    types: [submitted, edited, dismissed]
-
   # Watch for changes on PR comment
   issue_comment:
     types: [created, edited, deleted]
@@ -40,11 +36,7 @@ jobs:
     # Skip this workflow if:
     #   - the bot is retriggering itself
     #   - the event is emitted by codecov
-    #   - the event is a review on a pull request from a fork (see bot-proxy.yml)
-    if: |
-      github.actor != vars.GH_BOT_LOGIN &&
-      github.actor != 'codecov[bot]' &&
-      (github.event_name != 'pull_request_review' || github.event.pull_request.base.repo.full_name == github.event.pull_request.head.repo.full_name)
+    if: github.actor != vars.GH_BOT_LOGIN && github.actor != 'codecov[bot]'
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read
