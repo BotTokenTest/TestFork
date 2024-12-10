@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
-
 	"github-bot/internal/logger"
 	"github-bot/internal/utils"
+	"os"
+
 	"github.com/google/go-github/v64/github"
 )
 

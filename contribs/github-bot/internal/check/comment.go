@@ -5,13 +5,13 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
+	"github-bot/internal/client"
+	"github-bot/internal/config"
+	"github-bot/internal/utils"
 	"regexp"
 	"strings"
 	"text/template"
 
-	"github-bot/internal/client"
-	"github-bot/internal/config"
-	"github-bot/internal/utils"
 	"github.com/google/go-github/v64/github"
 	"github.com/sethvargo/go-githubactions"
 )

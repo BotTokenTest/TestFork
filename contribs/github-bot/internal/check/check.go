@@ -4,14 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
-	"sync"
-	"sync/atomic"
-
 	"github-bot/internal/client"
 	"github-bot/internal/config"
 	"github-bot/internal/logger"
 	"github-bot/internal/utils"
+	"strings"
+	"sync"
+	"sync/atomic"
+
 	"github.com/google/go-github/v64/github"
 	"github.com/sethvargo/go-githubactions"
 	"github.com/xlab/treeprint"
