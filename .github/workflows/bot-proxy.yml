@@ -27,7 +27,9 @@ jobs:
       - name: Download artifact from previous run
         uses: actions/download-artifact@v4
         with:
+          name: pr-number
           run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
         # Even if the artifact doesn't exist, do not mark the workflow as failed
         # Useful if the 'pull_request_review' event was emitted by a PR opened
         # from a branch on the main repo, so it has already been processed by
