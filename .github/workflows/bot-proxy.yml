@@ -1,38 +1,24 @@
 name: GitHub Bot Proxy
 
 on:
-  # Watch for changes on PR reviews
-  pull_request_review:
-    types: [submitted, edited, dismissed]
-
-  # Watch for any completed run on current workflow (loop)
+  # Watch for any completed run on bot.yml workflow
   workflow_run:
-    workflows: [GitHub Bot Proxy]
+    workflows: [GitHub Bot]
     types: [completed]
 
 jobs:
-  save-pr-number:
-    name: Persist PR number
+  # This workflow monitors any run completed on the GitHub Bot workflow and
+  # checks if the event that triggered it is limited to read-only permissions
+  # (e.g 'pull_request_review' on a pull request opened from a fork).
+  # In this case, it reruns the GitHub Bot workflow using a 'workflow_dispatch'
+  # event, thereby allowing it to run with write permissions.
+  #
+  # Complete flow:
+  # 'pull_request_review' on bot.yml (read-only) -> 'workflow_run' on bot-proxy.yml (write) -> 'workflow_dispatch' on bot.yml (write)
+  rerun-with-write-perm:
+    name: Rerun Bot with write permission
+    # Skip this workflow if the original event is not 'pull_request_review'
     if: github.event.workflow_run.event == 'pull_request_review'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Write PR number to a file
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          mkdir -p ./persist
-          echo $PR_NUMBER > ./persist/pr-number
-
-      - name: Upload it as an artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: pr-number
-          path: persist/
-
-  run-github-bot:
-    name: Run Bot workflow
-    if: github.event.workflow_run.event == 'workflow_run'
     runs-on: ubuntu-latest
     permissions:
       actions: write
@@ -42,9 +28,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: pr-number
-          path: persist
+        id: download
+        continue-on-error: true
 
       - name: Send workflow_dispatch event to Github Bot
+        if: steps.download.outcome == 'success'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run bot.yml -f "pull-request-list=$(cat persist/pr-number)"
+        run: gh workflow run bot.yml -f "pull-request-list=$(cat pr-number)"
