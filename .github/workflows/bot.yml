@@ -75,7 +75,7 @@ jobs:
   save-pr-number:
     name: Persist PR number for proxy
     # Run this job if the event is a review on a pull request opened from a fork
-    if: github.event_name == 'pull_request_review' && github.event.pull_request.base.repo.full_name != github.event.pull_request.head.repo.full_name)
+    if: github.event_name == 'pull_request_review' && github.event.pull_request.base.repo.full_name != github.event.pull_request.head.repo.full_name
     runs-on: ubuntu-latest
 
     steps:

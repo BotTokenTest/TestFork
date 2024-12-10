@@ -14,7 +14,7 @@ jobs:
   # event, thereby allowing it to run with write permissions.
   #
   # Complete flow:
-  # 'pull_request_review' on bot.yml (read-only) -> 'workflow_run' on bot-proxy.yml (write) -> 'workflow_dispatch' on bot.yml (write)
+  # 'pull_request_review' from fork on bot.yml (read-only) -> 'workflow_run' on bot-proxy.yml (write) -> 'workflow_dispatch' on bot.yml (write)
   rerun-with-write-perm:
     name: Rerun Bot with write permission
     # Skip this workflow if the original event is not 'pull_request_review'
