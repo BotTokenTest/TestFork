@@ -1,0 +1,35 @@
+name: GitHub Bot Proxy
+
+on:
+  # Watch for any requested run on bot.yml workflow
+  workflow_run:
+    workflows: [GitHub Bot]
+    types: [requested]
+
+jobs:
+  # This workflow monitors any run request on the GitHub Bot workflow and checks
+  # if the event that triggered it is limited to read-only permissions
+  # (e.g 'pull_request_review' on a pull request creted from a fork).
+  # In this case, it reruns the GitHub Bot workflow using a 'workflow_dispatch'
+  # event, thereby allowing it to run with write permissions.
+  #
+  # Complete flow:
+  # 'pull_request_review' on bot.yml (read-only) -> 'workflow_run' on bot-proxy.yml (write) -> 'workflow_dispatch' on bot.yml (write)
+  rerun-with-write-perm:
+    name: Rerun Bot with write permission
+    # Skip this workflow if the original event is not 'pull_request_review'
+    # if: github.event.workflow_run.event == 'pull_request_review'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: |
+          echo "$GITHUB_CONTEXT"
+      # - name: Send workflow_dispatch event to Github Bot
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: gh workflow run bot.yml -f 'pull-request-list=${{  }}'

@@ -24,9 +24,9 @@ var errTriggeredByBot = errors.New("event triggered by bot")
 // Compile regex only once.
 var (
 	// Regex for capturing the entire line of a manual check.
-	manualCheckLine = regexp.MustCompile(`(?m:^-\s\[([ xX])\]\s+(.+?)\s*(\(checked by @(\w+)\))?$)`)
+	manualCheckLine = regexp.MustCompile(`(?m:^- \[([ xX])\] (.+?)(?: \(checked by @([A-Za-z0-9-]+)\))?$)`)
 	// Regex for capturing only the checkboxes.
-	checkboxes = regexp.MustCompile(`(?m:^- \[[ x]\])`)
+	checkboxes = regexp.MustCompile(`(?m:^- \[[ xX]\])`)
 	// Regex used to capture markdown links.
 	markdownLink = regexp.MustCompile(`\[(.*)\]\([^)]*\)`)
 )
@@ -66,12 +66,11 @@ func getCommentManualChecks(commentBody string) map[string]manualCheckDetails {
 	// For each line that matches the "Manual check" regex.
 	for _, match := range manualCheckLine.FindAllStringSubmatch(commentBody, -1) {
 		description := match[2]
-		status := match[1]
+		status := strings.ToLower(match[1]) // if X captured, convert it to x.
 		checkedBy := ""
-		if len(match) > 4 {
-			checkedBy = strings.ToLower(match[4]) // if X captured, convert it to x.
+		if len(match) > 3 {
+			checkedBy = match[3]
 		}
-
 		checks[description] = manualCheckDetails{status: status, checkedBy: checkedBy}
 	}
 

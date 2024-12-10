@@ -161,13 +161,13 @@ func processPRList(gh *client.GitHub, prs []*github.PullRequest) error {
 					},
 				)
 
-				// Check the state of the special check that forces the bot to succeed.
-				if manualRule.Description == config.ForceSkipDescription && checkedBy != "" {
-					commentContent.ForceSkip = true
-					continue
-				}
-
-				if checkedBy == "" {
+				// If this check is the special one, store its state in the dedicated var.
+				if manualRule.Description == config.ForceSkipDescription {
+					if checkedBy != "" {
+						commentContent.ForceSkip = true
+					}
+				} else if checkedBy == "" {
+					// Or if its a normal check, just verify if it was checked by someone.
 					commentContent.ManualAllSatisfied = false
 				}
 			}

@@ -9,15 +9,11 @@ on:
       - labeled
       - unlabeled
       - opened
-      - edited
       - reopened
       - synchronize # PR head updated
       - converted_to_draft
       - ready_for_review
 
-  branch_protection_rule:
-    types: [created, edited, deleted]
-    
   # Watch for changes on PR reviews
   pull_request_review:
     types: [submitted, edited, dismissed]
@@ -41,8 +37,14 @@ jobs:
   # handle the parallel processing of the pull-requests
   define-prs-matrix:
     name: Define PRs matrix
-    # Prevent bot from retriggering itself and ignore event emitted by codecov
-    if: ${{ github.actor != vars.GH_BOT_LOGIN && github.actor != 'codecov[bot]' }}
+    # Skip this workflow if:
+    #   - the bot is retriggering itself
+    #   - the event is emitted by codecov
+    #   - the event is a review on a pull request from a fork (see bot-proxy.yml)
+    if: |
+      github.actor != vars.GH_BOT_LOGIN &&
+      github.actor != 'codecov[bot]' &&
+      (github.event_name != 'pull_request_review' || github.event.pull_request.base.repo.full_name == github.event.pull_request.head.repo.full_name)
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read
@@ -71,7 +73,7 @@ jobs:
     name: Process PR
     needs: define-prs-matrix
     # Just skip this job if PR numbers matrix is empty (prevent failed state)
-    if: ${{ needs.define-prs-matrix.outputs.pr-numbers != '[]' && needs.define-prs-matrix.outputs.pr-numbers != '' }}
+    if: needs.define-prs-matrix.outputs.pr-numbers != '[]' && needs.define-prs-matrix.outputs.pr-numbers != ''
     runs-on: ubuntu-latest
     strategy:
       matrix:
